@@ -12,6 +12,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LibraryApp">
         <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AuthorsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ManageBooksActivity"
+            android:exported="false" />
+        <activity
             android:name=".MenuActivity"
             android:exported="false" />
         <activity
@@ -25,6 +34,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
