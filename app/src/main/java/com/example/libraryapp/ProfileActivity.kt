@@ -1,20 +1,102 @@
 package com.example.libraryapp
 
+import android.app.DatePickerDialog
+import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import java.util.Calendar
 
 class ProfileActivity : AppCompatActivity() {
+
+    private lateinit var ivAvatar: ImageView
+    private lateinit var tvProfileDob: TextView
+    private var selectedDate = ""
+
+    private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { ivAvatar.setImageURI(it) }
+    }
+
+    private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
+        bitmap?.let { ivAvatar.setImageBitmap(it) }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_profile)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        ivAvatar = findViewById(R.id.ivAvatar)
+        val btnChangePhoto = findViewById<Button>(R.id.btnChangePhoto)
+        val etProfileName = findViewById<EditText>(R.id.etProfileName)
+        val etProfileEmail = findViewById<EditText>(R.id.etProfileEmail)
+        tvProfileDob = findViewById(R.id.tvProfileDob)
+        val btnSaveProfile = findViewById<Button>(R.id.btnSaveProfile)
+
+        val sharedPref = getSharedPreferences("LibraryPrefs", Context.MODE_PRIVATE)
+
+        etProfileName.setText(sharedPref.getString("name", ""))
+        etProfileEmail.setText(sharedPref.getString("email", ""))
+
+        val savedDob = sharedPref.getString("dob", "")
+        if (!savedDob.isNullOrEmpty()) {
+            selectedDate = savedDob
+            tvProfileDob.text = savedDob
+        } else {
+            tvProfileDob.text = "Оберіть дату народження"
+        }
+
+        tvProfileDob.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
+                selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
+                tvProfileDob.text = selectedDate
+            }, year, month, day).show()
+        }
+
+        btnChangePhoto.setOnClickListener {
+            val options = arrayOf("Камера", "Галерея")
+            AlertDialog.Builder(this)
+                .setTitle("Оберіть джерело фото")
+                .setItems(options) { _, which ->
+                    if (which == 0) {
+                        cameraLauncher.launch(null)
+                    } else {
+                        galleryLauncher.launch("image/*")
+                    }
+                }
+                .show()
+        }
+
+        btnSaveProfile.setOnClickListener {
+            val newName = etProfileName.text.toString().trim()
+            val newEmail = etProfileEmail.text.toString().trim()
+
+            if (newName.isEmpty() || newEmail.isEmpty()) {
+                Toast.makeText(this, "Заповніть всі поля", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            with(sharedPref.edit()) {
+                putString("name", newName)
+                putString("email", newEmail)
+                putString("dob", selectedDate)
+                apply()
+            }
+
+            Toast.makeText(this, "Дані успішно оновлено!", Toast.LENGTH_SHORT).show()
+            finish()
         }
     }
 }
