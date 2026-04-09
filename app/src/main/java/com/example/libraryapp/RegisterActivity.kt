@@ -53,7 +53,7 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            if (!email.contains("@") || !email.contains(".")) {
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 Toast.makeText(this, "Невірний формат Email!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
