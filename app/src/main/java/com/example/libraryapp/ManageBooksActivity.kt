@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -34,6 +35,20 @@ class ManageBooksActivity : AppCompatActivity() {
         adapter = BookAdapter(booksList)
         rvBooks.layoutManager = LinearLayoutManager(this)
         rvBooks.adapter = adapter
+
+        val swipeHandler = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                booksList.removeAt(position)
+                adapter.notifyItemRemoved(position)
+            }
+        }
+
+        ItemTouchHelper(swipeHandler).attachToRecyclerView(rvBooks)
 
         btnAddBook.setOnClickListener {
             showBookDialog(-1)
