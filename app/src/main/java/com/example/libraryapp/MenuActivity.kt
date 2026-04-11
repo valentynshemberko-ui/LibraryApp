@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
 class MenuActivity : AppCompatActivity() {
@@ -37,12 +38,19 @@ class MenuActivity : AppCompatActivity() {
         }
 
         btnLogout.setOnClickListener {
-            with(sharedPref.edit()) {
-                putBoolean("isAuthorized", false)
-                apply()
-            }
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
+            AlertDialog.Builder(this)
+                .setTitle("Підтвердження")
+                .setMessage("Ви впевнені, що хочете вийти з акаунту?")
+                .setPositiveButton("Так") { _, _ ->
+                    with(sharedPref.edit()) {
+                        putBoolean("isAuthorized", false)
+                        apply()
+                    }
+                    startActivity(Intent(this, LoginActivity::class.java))
+                    finish()
+                }
+                .setNegativeButton("Ні", null)
+                .show()
         }
     }
 }
