@@ -3,21 +3,25 @@ package com.example.libraryapp
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 
 class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_splash)
 
-        val sharedPref = getSharedPreferences("LibraryPrefs", Context.MODE_PRIVATE)
-        val isAuthorized = sharedPref.getBoolean("isAuthorized", false)
+        Handler(Looper.getMainLooper()).postDelayed({
+            val sharedPref = getSharedPreferences("LibraryPrefs", Context.MODE_PRIVATE)
+            val isAuthorized = sharedPref.getBoolean("isAuthorized", false)
 
-        if (isAuthorized) {
-            startActivity(Intent(this, MenuActivity::class.java))
-        } else {
-            startActivity(Intent(this, LoginActivity::class.java))
-        }
-
-        finish()
+            if (isAuthorized) {
+                startActivity(Intent(this, MenuActivity::class.java))
+            } else {
+                startActivity(Intent(this, LoginActivity::class.java))
+            }
+            finish()
+        }, 1000)
     }
 }
