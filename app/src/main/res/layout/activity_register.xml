@@ -21,9 +21,19 @@
         <EditText android:id="@+id/etName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Ім'я" />
         <EditText android:id="@+id/etSurname" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Прізвище" />
 
-        <TextView android:id="@+id/tvDob" android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Оберіть дату народження" android:textSize="18sp" android:padding="12dp"
-            android:background="#E0E0E0" android:layout_marginTop="8dp" android:layout_marginBottom="8dp"/>
+        <TextView
+            android:id="@+id/tvDob"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📅 Оберіть дату народження"
+            android:textSize="18sp"
+            android:textColor="#3F51B5"
+            android:textStyle="bold"
+            android:padding="16dp"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"/>
 
         <EditText android:id="@+id/etEmail" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Email" android:inputType="textEmailAddress" />
         <EditText android:id="@+id/etLogin" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Логін" />
