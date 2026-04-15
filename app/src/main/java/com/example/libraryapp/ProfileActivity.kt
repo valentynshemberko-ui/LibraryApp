@@ -3,6 +3,7 @@ package com.example.libraryapp
 import android.app.DatePickerDialog
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
@@ -13,6 +14,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Calendar
 
 class ProfileActivity : AppCompatActivity() {
@@ -20,13 +23,21 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var ivAvatar: ImageView
     private lateinit var tvProfileDob: TextView
     private var selectedDate = ""
+    private var selectedBitmap: Bitmap? = null
 
     private val galleryLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let { ivAvatar.setImageURI(it) }
+        uri?.let {
+            val inputStream = contentResolver.openInputStream(it)
+            selectedBitmap = BitmapFactory.decodeStream(inputStream)
+            ivAvatar.setImageBitmap(selectedBitmap)
+        }
     }
 
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap: Bitmap? ->
-        bitmap?.let { ivAvatar.setImageBitmap(it) }
+        bitmap?.let {
+            selectedBitmap = it
+            ivAvatar.setImageBitmap(selectedBitmap)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,6 +51,16 @@ class ProfileActivity : AppCompatActivity() {
         tvProfileDob = findViewById(R.id.tvProfileDob)
         val btnSaveProfile = findViewById<Button>(R.id.btnSaveProfile)
 
+        try {
+            val file = File(filesDir, "avatar.png")
+            if (file.exists()) {
+                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                ivAvatar.setImageBitmap(bitmap)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         val sharedPref = getSharedPreferences("LibraryPrefs", Context.MODE_PRIVATE)
 
         etProfileName.setText(sharedPref.getString("name", ""))
@@ -50,7 +71,7 @@ class ProfileActivity : AppCompatActivity() {
             selectedDate = savedDob
             tvProfileDob.text = savedDob
         } else {
-            tvProfileDob.text = "Оберіть дату народження"
+            tvProfileDob.text = "📅 Оберіть дату народження"
         }
 
         tvProfileDob.setOnClickListener {
@@ -86,6 +107,18 @@ class ProfileActivity : AppCompatActivity() {
             if (newName.isEmpty() || newEmail.isEmpty()) {
                 Toast.makeText(this, "Заповніть всі поля", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
+            }
+
+            selectedBitmap?.let { bitmap ->
+                try {
+                    val file = File(filesDir, "avatar.png")
+                    val outputStream = FileOutputStream(file)
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                    outputStream.flush()
+                    outputStream.close()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
 
             with(sharedPref.edit()) {
